@@ -41,8 +41,7 @@ public class WeatherServiceImpl implements WeatherService {
         params.put("appid",apiKey);
         ObjectMapper objectMapper = new ObjectMapper();
         try{
-            ResponseEntity<String> responseEntity= restTemplate.getForEntity(url, String.class,params);
-            ZipAPIResponse zipAPIResponse = objectMapper.readValue(responseEntity.getBody(),ZipAPIResponse.class);
+            ZipAPIResponse zipAPIResponse = restTemplate.getForObject(url, ZipAPIResponse.class,params);
             double latitude = zipAPIResponse.getLat();
             double longitude = zipAPIResponse.getLon();
 
@@ -50,8 +49,7 @@ public class WeatherServiceImpl implements WeatherService {
             params.put("lon", String.valueOf(longitude));
 
             url = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}";
-            responseEntity= restTemplate.getForEntity(url, String.class,params);
-            CurrentWeatherAPIResponse currentWeatherAPIResponse = objectMapper.readValue(responseEntity.getBody(),CurrentWeatherAPIResponse.class);
+            CurrentWeatherAPIResponse currentWeatherAPIResponse= restTemplate.getForObject(url, CurrentWeatherAPIResponse.class,params);
             weatherInfo.setLocationName(currentWeatherAPIResponse.getName());
             weatherInfo.setCountry(currentWeatherAPIResponse.getSys().getCountry());
 
@@ -83,8 +81,7 @@ public class WeatherServiceImpl implements WeatherService {
     private Map<String,Integer> getTimeOffset(double lat, double lon) throws JsonProcessingException {
         Map<String,Integer> offsetDetails = new HashMap<>();
         String url = TIMEOFFSETURL+lat+","+lon;
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
-        TimeOffset timeOffset = new ObjectMapper().readValue(responseEntity.getBody(),TimeOffset.class);
+        TimeOffset timeOffset = restTemplate.getForObject(url, TimeOffset.class);
         double offset = timeOffset.getOffset();
 
         int hours = (int) ((offset*60)/60);
